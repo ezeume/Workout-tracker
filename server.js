@@ -21,12 +21,10 @@ mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/workout", { use
 
 //Routes
 
-// Update just one note by an id
 app.put("/api/workouts/:id", (req, res) => {
     db.Workout.findByIdAndUpdate(
         req.params.id,
         { $push: { exercises: req.body } },
-        // "runValidators" will ensure new exercises meet our schema requirements
         { new: true, runValidators: true }
     )
         .then(dbWorkout => {
@@ -51,12 +49,40 @@ app.post("/api/workouts", function (req, res) {
 
 
 app.get("/api/workouts", (req, res) => {
+    console.log("get api/workouts")
     db.Workout.find({})
         //.sort({ date: -1 })
         .then(dbWorkout => {
-            res.json(dbWorkout);
+            //console.log(dbWorkout)
+
+            let totalDuration = 0;
+            //let workoutArr = [];
+
+            let newDbWorkout = dbWorkout.map(workout => {
+                let workoutCopy = {};
+
+                workoutCopy.day = workout.day;
+                workoutCopy.exercises = workout.exercises;
+
+                workout.exercises.map(exercise => {
+                    totalDuration += exercise.duration;
+
+                });
+
+                workoutCopy.totalDuration = totalDuration;
+
+                console.log(workoutCopy)
+                totalDuration = 0;
+                return workoutCopy;
+            });
+
+            console.log(totalDuration);
+            console.log(newDbWorkout)
+
+            res.json(newDbWorkout);
         })
         .catch(err => {
+            console.log(err);
             res.status(400).json(err);
         });
 });

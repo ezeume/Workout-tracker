@@ -1,5 +1,6 @@
 const API = {
   async getLastWorkout() {
+    console.log("getLastWorkout");
     let res;
     try {
       res = await fetch("/api/workouts");

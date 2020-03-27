@@ -22,39 +22,45 @@ mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/workout", { use
 //Routes
 
 // Update just one note by an id
-app.post("/api/workouts/id", function(req, res) {
-    // When searching by an id, the id needs to be passed in
-    // as (mongojs.ObjectId(IDYOUWANTTOFIND))
-    console.log(req.body);
-    // Update the note that matches the object id
-    db.Workout.update(
-      {
-        _id: mongojs.ObjectId(req.params.id)
-      },
-      {
-        // Set the title, note and modified parameters
-        // sent in the req's body.
-        
-        $push: {
-          exercise: req.body,
-          modified: Date.now()
-        }
-      },
-      function(error, edited) {
-        // Log any errors from mongojs
-        if (error) {
-          console.log(error);
-          res.send(error);
-        }
-        else {
-          // Otherwise, send the mongojs response to the browser
-          // This will fire off the success function of the ajax request
-          console.log(edited);
-          res.send(edited);
-        }
-      }
-    );
+app.put("/api/workouts/:id", (req, res) => {
+    db.Workout.findByIdAndUpdate(
+      req.params.id,
+      { $push: { exercises: req.body } },
+      // "runValidators" will ensure new exercises meet our schema requirements
+      { new: true, runValidators: true }
+    )
+      .then(dbWorkout => {
+        res.json(dbWorkout);
+      })
+      .catch(err => {
+        res.json(err);
+      });
   });
+
+  app.post("/api/workouts", function(req, res) {
+      db.Workout.create({})
+      .then(dbWorkout=>{
+          res.json(dbWorkout);
+        })
+      .catch(err=>{
+          res.json(err);
+        });
+    // When searching by an id, the id needs to be passed 
+    // console.log(req.body);
+    // res.json
+  });
+
+//   app.post("/submit", ({ body }, res) => {
+//     db.Note.create(body)
+//       .then(({ _id }) => db.User.findOneAndUpdate({}, { $push: { notes: _id } }, { new: true }))
+//       .then(dbUser => {
+//         res.json(dbUser);
+//       })
+//       .catch(err => {
+//         res.json(err);
+//       });
+//   });
+
 
 app.get("/api/workouts", (req, res) => {
     db.Workout.find({})
@@ -66,6 +72,19 @@ app.get("/api/workouts", (req, res) => {
         res.status(400).json(err);
       });
   });
+
+  app.get("/api/workouts/range", (req, res) => {
+    db.Workout.find({})
+    .limit(7)
+      //.sort({ date: -1 })
+      .then(dbWorkout => {
+        res.json(dbWorkout);
+      })
+      .catch(err => {
+        res.status(400).json(err);
+      });
+  });
+
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "public/index.html"));
 });

@@ -49,15 +49,11 @@ app.post("/api/workouts", function (req, res) {
 
 
 app.get("/api/workouts", (req, res) => {
-    console.log("get api/workouts")
+    // console.log("get api/workouts")
     db.Workout.find({})
-        //.sort({ date: -1 })
         .then(dbWorkout => {
-            //console.log(dbWorkout)
-
             let totalDuration = 0;
             //let workoutArr = [];
-
             let newDbWorkout = dbWorkout.map(workout => {
                 let workoutCopy = {};
 
@@ -66,23 +62,16 @@ app.get("/api/workouts", (req, res) => {
 
                 workout.exercises.map(exercise => {
                     totalDuration += exercise.duration;
-
                 });
 
                 workoutCopy.totalDuration = totalDuration;
-
-                console.log(workoutCopy)
                 totalDuration = 0;
                 return workoutCopy;
             });
 
-            console.log(totalDuration);
-            console.log(newDbWorkout)
-
             res.json(newDbWorkout);
         })
         .catch(err => {
-            console.log(err);
             res.status(400).json(err);
         });
 });
@@ -99,18 +88,23 @@ app.get("/api/workouts/range", (req, res) => {
         });
 });
 
+//Routes for HTML pages
+//route for index html
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "public/index.html"));
 });
 
+//get route for exercise html page
 app.get("/exercise", (req, res) => {
     res.sendFile(path.join(__dirname, "public/exercise.html"));
 });
 
+//get route for workout html page
 app.get("/workout", (req, res) => {
     res.sendFile(path.join(__dirname, "public/workout.html"));
 });
 
+//get route for stats HTML page
 app.get("/stats", (req, res) => {
     res.sendFile(path.join(__dirname, "public/stats.html"));
 });

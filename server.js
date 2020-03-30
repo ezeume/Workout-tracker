@@ -59,7 +59,8 @@ app.get("/api/workouts", (req, res) => {
 
                 workoutCopy.day = workout.day;
                 workoutCopy.exercises = workout.exercises;
-
+                workoutCopy.id = workout.id;
+                workoutCopy._id = workout._id;
                 workout.exercises.map(exercise => {
                     totalDuration += exercise.duration;
                 });
